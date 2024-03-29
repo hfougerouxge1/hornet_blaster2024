@@ -60,8 +60,8 @@ all: main-build
 main-build: ServoHerkulex-F446.elf secondary-outputs
 
 # Tool invocations
-ServoHerkulex-F446.elf ServoHerkulex-F446.map: $(OBJS) $(USER_OBJS) C:\travail\helena\ServoHerkulex-F446\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "ServoHerkulex-F446.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\travail\helena\ServoHerkulex-F446\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ServoHerkulex-F446.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+ServoHerkulex-F446.elf ServoHerkulex-F446.map: $(OBJS) $(USER_OBJS) C:\travail\Serine_belhadj\dossier_sae\sae_Hornet_Blaster-2024\ServoHerkulex-F446\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "ServoHerkulex-F446.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\travail\Serine_belhadj\dossier_sae\sae_Hornet_Blaster-2024\ServoHerkulex-F446\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ServoHerkulex-F446.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

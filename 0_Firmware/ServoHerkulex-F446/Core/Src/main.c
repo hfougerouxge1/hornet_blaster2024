@@ -1,4 +1,4 @@
-/* USER CODE BEGIN Header */
+ /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -61,7 +61,8 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-	int zero =788;
+	int zero_x =788;
+	int zero_y = 788;
 	int pos_x;
 	int pos_y;
 
@@ -113,53 +114,48 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  // initialisation position
-  move_positional(0x11 , 510, 25, H_LED_RED);
-  move_positional(0x12 , 510, 25, H_LED_RED);
+  //set_LED(0x12,  H_LED_CYAN);
+  //move_angle(0x12,159.8, 10, H_LED_GREEN);
+ // move_continuous(0x12, 100, H_LED_RED);
 
+  move_positional(0x11 , 510, 50, H_LED_RED);//gauche 595 droite 428
+  move_positional(0x12 ,510 , 50, H_LED_RED); // bas 435, haut 580, milieu de la planche 510
   while (1)
   {
-	  //fonction bloquante attente reception caractères pour x
+	  //fonction bloquante
 	  HAL_UARTEx_ReceiveToIdle(&huart2, x_donnees_recues, 10, &nb_de_caract_recus,
 		  	    			HAL_MAX_DELAY);
-	  x_valeur_brute = atoi(x_donnees_recues); // transforme une chaîne de caractère en entier
-
-	  if (x_valeur_brute > 553)
-	  {
-		  x_valeur_brute = 553;
-	  }
-	  if (x_valeur_brute < 0)
-	  {
-		  x_valeur_brute = 0;
-	  }
-
-	  // transmission des données de x
+	  x_valeur_brute = atoi(x_donnees_recues); // transforme en entier
+	  	  if (x_valeur_brute > 364)
+	  	  	  	  {
+	  	  		  x_valeur_brute = 360;
+	  	  	  	  }
+	  	  if (x_valeur_brute < 200)
+	  			  {
+	  				x_valeur_brute = 195;
+	  			  }
 	  HAL_UART_Transmit(&huart1, x_donnees_recues, nb_de_caract_recus, HAL_MAX_DELAY);
 
 
-	  //fonction bloquante attente reception caractères pour y
 	  HAL_UARTEx_ReceiveToIdle(&huart2, y_donnees_recues, 10, &nb_de_caract_recus,HAL_MAX_DELAY);
 	  y_valeur_brute = atoi(y_donnees_recues);
 
-	  //test dépassement valeur max/min
-	  if (y_valeur_brute > 553)
-	  {
-		  y_valeur_brute = 553;
-	  }
-	  if (y_valeur_brute < 0)
-	  {
-		  y_valeur_brute = 0;
-	  }
-	  // transmission des données de y
+	  if (y_valeur_brute > 354)
+	  	  	  	  	  {
+	  	  	  	  		y_valeur_brute = 350;
+	  	  	  	  	  }
+	  if (y_valeur_brute < 215)
+	  	  	  	  	  {
+	  	  	  	  		y_valeur_brute = 215;
+	  	  	  	  	  }
 	  HAL_UART_Transmit(&huart1, y_donnees_recues, nb_de_caract_recus, HAL_MAX_DELAY);
 
-	  //calcul des positions à envoyer aux servomoteurs
-	  pos_x = zero - x_valeur_brute; // valeur brute : envoyée par termite
-	  pos_y = zero - y_valeur_brute; // valeur brute : envoyée par termite
 
-	  // envoie des données aux servomoteurs
+	  pos_x = zero_x - x_valeur_brute; // valeur brute : envoyée par termite
+	  pos_y = zero_y - y_valeur_brute; // valeur brute : envoyée par termite
+
 	  move_positional(0x11, pos_x, 25, H_LED_BLUE);
-	  HAL_Delay(2000);
+	  HAL_Delay(200);
 	  move_positional(0x12, pos_y, 25, H_LED_GREEN);
 
 	  /* USER CODE END WHILE */

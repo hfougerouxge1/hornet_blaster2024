@@ -17,9 +17,13 @@ public:
     MouseTracker(QWidget *parent = nullptr) : QWidget(parent), serialPort(nullptr)
     {
         setMouseTracking(true);
-        setFixedSize(553, 553);
+        setFixedSize(553, 463 );
         serialPort = new QSerialPort(this);
         connect(serialPort, &QSerialPort::errorOccurred, this, &MouseTracker::handleError);
+
+        imageRemovalTimer = new QTimer(this);
+        connect(imageRemovalTimer, &QTimer::timeout, this, &MouseTracker::removeOldestImage);
+        imageRemovalTimer->start(3000);
 
         // Find highest COM port available
         QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
@@ -46,7 +50,10 @@ public:
         connect(timer, &QTimer::timeout, this, &MouseTracker::sendYData);
         QTimer *imageTimer = new QTimer(this);
         connect(imageTimer, &QTimer::timeout, this, &MouseTracker::displayRandomImage);
-        imageTimer->start(2000);
+        imageTimer->start(3000);
+
+        imageRemovalTimer->start(3000);
+
     }
 
 protected:
@@ -62,7 +69,7 @@ protected:
         for (int i = 0; i < imageRects.size(); ++i) {
             if (imageRects[i].contains(event->pos())) {
                 // Supprimez le rectangle de la liste
-                imageRects.removeAt(i);
+                imageRects.remove(i);
                 // Mettez à jour la fenêtre pour refléter les changements
                 update();
                 return; // Sortez de la boucle car vous avez trouvé l'image cliquée
@@ -73,12 +80,12 @@ protected:
     void paintEvent(QPaintEvent *event) override
     {
         QPainter painter(this);
-        QPixmap backgroundImage("C:/travail/Serine_belhadj/image_Frelon/jardin.jpg");
+        QPixmap backgroundImage("C:/travail/Serine_belhadj/dossier_sae/sae_Hornet_Blaster-2024/image_Frelon/jardin.jpg");
         painter.drawPixmap(rect(), backgroundImage, backgroundImage.rect());
 
         // Dessiner les images
         for (const QRect &imageRect : imageRects) {
-            QPixmap image("C:/travail/Serine_belhadj/image_Frelon/frelon2.png");
+            QPixmap image("C:/travail/Serine_belhadj/dossier_sae/sae_Hornet_Blaster-2024/image_Frelon/frelon2.png");
             painter.drawPixmap(imageRect, image);
         }
     }
@@ -123,19 +130,40 @@ private slots:
         int y = QRandomGenerator::global()->bounded(height() - 100); // Hauteur de la fenêtre - hauteur de l'image
 
         // Charger l'image à partir du fichier sur le disque
-        QPixmap image("C:/travail/Serine_belhadj/image_Frelon/frelon2.png");
+        QPixmap image("C:/travail/Serine_belhadj/dossier_sae/sae_Hornet_Blaster-2024/image_Frelon/frelon2.png");
 
+        if (x >= 450 || y >= 350) {
+            // Régler les coordonnées à l'intérieur de la limite
+            x = QRandomGenerator::global()->bounded(400 - 100); // Limite de largeur - largeur de l'image
+            y = QRandomGenerator::global()->bounded(300 - 100); // Limite de hauteur - hauteur de l'image
+        }
         // Vérifier si le chargement de l'image a réussi
         if (image.isNull()) {
             qDebug() << "Erreur : Impossible de charger l'image.";
             return;
         }
 
-        // Ajouter le rectangle de l'image à la liste
-        imageRects.append(QRect(x, y, 100, 100)); // Taille de l'image (100x100)
+
+        imageIds.append(imageIdCounter);
+        imageIdCounter++;
+
+        imageRects.insert(imageIdCounter, QRect(x, y, 80, 80));
 
         // Mettre à jour la fenêtre
         update();
+    }
+    void removeOldestImage()
+    {
+        if (!imageIds.isEmpty()) {
+            // Get the ID of the oldest image
+            int oldestImageId = imageIds.takeFirst();
+
+            // Remove the image rectangle associated with the oldest ID
+            imageRects.remove(oldestImageId);
+
+            // Update the window
+            update();
+        }
     }
 
 
@@ -144,8 +172,10 @@ private:
     int x_data; // Variable to store X coordinate
     int y_data; // Variable to store Y coordinate
     QTimer *timer; // Timer for sending Y data after X data
-    QList<QRect> imageRects; // Liste des rectangles d'images pour afficher les images à des positions aléatoires
-
+    QTimer *imageRemovalTimer; // Timer for removing images
+    QMap<int, QRect> imageRects; // Map to store image rectangles with associated IDs
+    QList<int> imageIds; // List to store IDs of displayed images
+    int imageIdCounter = 0;
 };
 
 int main(int argc, char *argv[])
